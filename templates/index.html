@@ -1,0 +1,151 @@
+$def with (form, text)
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script src="https://use.fontawesome.com/3b64757f9a.js"></script> <!-- Font awesome -->
+  	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="static/css/style.css">
+    <script>
+      function Process()
+      {
+        var input_string = jQuery("#factFor").val();
+        jQuery("#loading").removeClass("hidden");
+        jQuery.ajax({
+          type: "POST",
+          data: {textfield : input_string},
+          success: function(data)
+          {
+            jQuery("#userInput").css({
+              'border-bottom-left-radius' : '0px',
+              'border-bottom-right-radius' : '0px'
+            });
+            //jQuery("#output").removeClass("hidden").html("<p>" + data + "</p>").hide().fadeIn(500);
+            var score, i = 0;
+            while(data[i] != '@')
+            {
+              score += data[i];
+              i++;
+            }
+            data = data.substr(i+1);
+            score = score.replace(/\D/g,'');
+            score = parseInt(score);
+            jQuery("#output").removeClass("hidden").html("<h2>Results</h2>" + data).hide().fadeIn(500);
+            DrawScale(score);
+            jQuery("#loading").addClass("hidden");
+          },
+          error: function(data)
+          {
+            jQuery("#userInput").css({
+              'border-bottom-left-radius' : '0px',
+              'border-bottom-right-radius' : '0px'
+            });
+            jQuery("#output").removeClass("hidden").html("Sorry, there was an issue contacting our server :(");
+          }
+        });
+      }
+
+      function ViewProportions()
+      {
+        if(jQuery(document).width() < 1150)
+        {
+          jQuery("#container").css({
+            'top' : '5%',
+            'left' : '10%',
+            'width' : '80%'
+          });
+          jQuery("#userInput").css({
+            'padding-left' : '2em',
+            'padding-right' : '2em'
+          });
+          jQuery("#output").css({
+            'padding' : '2em'
+          });
+        }
+        else
+        {
+          jQuery("#container").css({
+            'top' : '15%',
+            'left' : '24%',
+            'width' : '50%'
+          });
+          jQuery("#userInput").css({
+            'padding-left' : '5em',
+            'padding-right' : '5em'
+          });
+          jQuery("#output").css({
+            'padding' : '5em'
+          });
+        }
+      }
+
+      jQuery( document ).ready( function() {
+        ViewProportions();
+        jQuery.ajax({
+          type: "POST",
+          data: {textfield : true },
+          success : function(data)
+          {
+            var dataForN = data.search("@@");
+            var dataFor = data.substr(0, dataForN);
+            var dataAgainst = data.substr(dataForN + 2, data.length);
+            jQuery("#factFor").val(dataFor);
+            //jQuery("#factAgainst").val(dataAgainst);
+          }
+        });
+      });
+
+      function DrawScale(score)
+      {
+        // Scoring to-do
+        //var forVal = 300, againstVal = 200;
+        //var forPerc = forVal / (forVal + againstVal), againstPerc = 1 - forPerc;
+        var forPerc = 0, againstPerc = 0;
+        if (score > 0)
+        {
+          forPerc = 0.6;
+          againstPerc = 0.4;
+        }
+        else
+        {
+          forPerc = 0.4;
+          againstPerc = 0.6;
+        }
+        var divWidth = jQuery("#output").width();
+        divWidth /= 4;
+        var svgDraw = '<svg height="' + divWidth + '" width="' + divWidth + '" > ';
+        svgDraw += '<line x1="' + divWidth/2 + '" y1="' + divWidth + '" x2="' + divWidth/2 + '" y2="' + divWidth/2 + '"  style="stroke:rgb(255,0,0); stroke-width:5" />';
+        svgDraw += '<line x1="' + divWidth/5 + '" y1="' + divWidth * forPerc + '" x2="' + divWidth * (4/5) + '" y2="' + divWidth * againstPerc + '"  style="stroke:rgb(255,0,0); stroke-width:2" />';
+        svgDraw += '<polygon points="' + divWidth/5 + ',' + divWidth * forPerc + ' ' + String(divWidth/5 - divWidth/14) + ',' + String(divWidth * forPerc + divWidth/10) + ' ' + String(divWidth/5 + divWidth/14) + ',' + String(divWidth * forPerc + divWidth/10) + '" style="fill:red" />';
+        svgDraw += '<polygon points="' + divWidth*(4/5) + ',' + divWidth * againstPerc + ' ' + String(divWidth*(4/5) - divWidth/14) + ',' + String(divWidth * againstPerc + divWidth/10) + ' ' + String(divWidth*(4/5) + divWidth/14) + ',' + String(divWidth * againstPerc + divWidth/10) + '" style="fill:red" />';
+        svgDraw += '<text x="' + divWidth*0.12 + '" y="' + divWidth + '" font-family="Verdana" font-size="20">FOR</text>';
+        svgDraw += '<text x="' + divWidth*0.67 + '" y="' + divWidth + '" font-family="Verdana" font-size="20">AGAINST</text>';
+        svgDraw += '</svg>';
+        jQuery("#output").append(svgDraw);
+      }
+    </script>
+  </head>
+  <body onresize="ViewProportions()">
+    <div id="container">
+      <div id="content">
+        <div id="userInput">
+          <p align="center" id="title">
+            Fact-Scale <i class="fa fa-balance-scale" aria-hidden="true" style="font-size:inherit"></i>
+          </p>
+          <form>
+            Please enter an affirmative hypothesis/statement: <input type="text" id="factFor" value="Donald Trump likes bees" class="form-control"><br>
+            <!--Please enter the counter-fact (Or this will be done automatically): <input type="text" id="factAgainst" value="Donald Trump does not like bees" class="form-control"><br>-->
+          </form>
+          <p align="center">
+            <button type="button" class="btn btn-success" style="min-width:30%; font-size:20px;" onclick="Process()">Check</button>
+          </p>
+          <div id="loading" class="hidden" align="center"><img src="static/images/loadanim.gif" /><h2 style="color:white">Loading...</h2></div>
+        </div>
+        <div id="output" class="hidden">
+          $text
+        </div>
+      </div>
+      <div><br><br><br></div>
+    </div>
+  </body>
+</html>
