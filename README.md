@@ -1,10 +1,10 @@
 # README #
-This is a web-app that is designed to skim-read abstracts and score the conclusiveness (or affirmativeness) of their findings.
-For example, it should give a high positive score if significant results for the hypothesis inputted are found and a high negative for findings that the hypothesis are non-significant.
+This is a web-app that is designed to skim-read abstracts and score the conclusiveness of their findings.
+For example, it should give a high positive score if there are significant results for the inputted hypothesis.
 
 However, Google Scholar is tough on robot-traffic so development is difficult.  
   
-Currently, there is a lot to do on the scoring system, dealing with Google Scholar (I would like to search here since the wording used in scholarly articles follows more of a pattern than in general articles), 
+Currently, there is a lot to do on the scoring system, dealing with Google Scholar (I would like to search here since the wording used in scholarly articles follow more of a pattern than in general), 
 language analysis is very simple at this point
 ## Dependencies ##
 python3  
